@@ -1,0 +1,22 @@
+---
+- name: service jenkins 
+  hosts: jenkins-server
+  become: true
+  tasks:
+  - name: jenkins stop    #First stop the jenkins service 
+    ansible.builtin.service:
+      name: jenkins
+      state: stopped
+  - name: Backup old Jenkins War File  #Second step is to backup the existing jenkins.war file
+    shell: sudo mv /usr/share/java/jenkins.war /usr/share/java/jenkins.war.back
+    become: true
+  - name: Download/Install Jenkins war file  #Third step, download and install new war file.
+    become: yes
+    get_url:
+        url: https://updates.jenkins-ci.org/latest/jenkins.war
+        dest: /usr/share/java/
+        mode: 0755
+  - name: jenkins service start    #Finally start the jenkins service 
+    ansible.builtin.service:
+          name: jenkins
+          state: started
